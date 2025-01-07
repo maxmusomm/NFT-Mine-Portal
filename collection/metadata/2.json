@@ -1,0 +1,31 @@
+{
+  "name": "ICBM2",
+  "description": "A few ICBM's - 2",
+  "image": "https://lavender-accessible-lungfish-772.mypinata.cloud/ipfs/Qmd4y4Y1qR8UyKekq93YrkKwUD6KjD7DMxUG2E59C29aQP/icbm2.png",
+  "external_url": "https://lavender-accessible-lungfish-772.mypinata.cloud/ipfs/Qmd4y4Y1qR8UyKekq93YrkKwUD6KjD7DMxUG2E59C29aQP//icbm2.png",
+  "attributes": [
+    {
+      "trait_type": "background",
+      "value": "bg2"
+    },
+    {
+      "trait_type": "Icbm",
+      "value": "icbm1"
+    },
+    {
+      "trait_type": "top",
+      "value": "top3"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://lavender-accessible-lungfish-772.mypinata.cloud/ipfs/Qmd4y4Y1qR8UyKekq93YrkKwUD6KjD7DMxUG2E59C29aQP/icbm2.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image",
+    "creators": []
+  },
+  "compiler": "NFTexport.io"
+}
