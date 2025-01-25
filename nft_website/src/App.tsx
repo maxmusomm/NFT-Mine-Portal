@@ -1,12 +1,11 @@
 import { TopBar, NFTCard } from "./components/index";
-import { BrowserProvider, JsonRpcSigner } from "ethers";
+import { BrowserProvider, JsonRpcSigner, ethers } from "ethers";
 import { useState } from "react";
 import "./App.css";
 
 function App() {
   const [walletAddress, setWalletAddress] = useState("");
   /*Change the provider to =--=> <BrowserProvider | null>(null) */
-  const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
   const [contractAddress] = useState(
     "0x25C7E53E5901a045629bA7996DDE7629630F784E"
@@ -18,6 +17,11 @@ function App() {
           internalType: "address",
           name: "initialOwner",
           type: "address",
+        },
+        {
+          internalType: "string",
+          name: "baseTokenURI",
+          type: "string",
         },
       ],
       stateMutability: "nonpayable",
@@ -224,6 +228,19 @@ function App() {
       inputs: [
         {
           indexed: false,
+          internalType: "string",
+          name: "newBaseURI",
+          type: "string",
+        },
+      ],
+      name: "BaseURIUpdated",
+      type: "event",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
           internalType: "uint256",
           name: "_fromTokenId",
           type: "uint256",
@@ -244,11 +261,56 @@ function App() {
         {
           indexed: false,
           internalType: "uint256",
+          name: "newCost",
+          type: "uint256",
+        },
+      ],
+      name: "CostUpdated",
+      type: "event",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: "uint256",
           name: "_tokenId",
           type: "uint256",
         },
       ],
       name: "MetadataUpdate",
+      type: "event",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: "bool",
+          name: "enabled",
+          type: "bool",
+        },
+      ],
+      name: "MintingStatusUpdated",
+      type: "event",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "to",
+          type: "address",
+        },
+        {
+          indexed: true,
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256",
+        },
+      ],
+      name: "NFTMinted",
       type: "event",
     },
     {
@@ -296,6 +358,19 @@ function App() {
       type: "event",
     },
     {
+      inputs: [],
+      name: "MAX_SUPPLY",
+      outputs: [
+        {
+          internalType: "uint8",
+          name: "",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
       inputs: [
         {
           internalType: "address",
@@ -322,45 +397,6 @@ function App() {
         },
       ],
       name: "balanceOf",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "baseExtension",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "baseURI",
-      outputs: [
-        {
-          internalType: "string",
-          name: "",
-          type: "string",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "cost",
       outputs: [
         {
           internalType: "uint256",
@@ -404,6 +440,32 @@ function App() {
         },
       ],
       name: "isApprovedForAll",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "mintCost",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "mintingEnabled",
       outputs: [
         {
           internalType: "bool",
@@ -552,11 +614,11 @@ function App() {
       inputs: [
         {
           internalType: "string",
-          name: "_newBaseExtension",
+          name: "newBaseURI",
           type: "string",
         },
       ],
-      name: "setBaseExtension",
+      name: "setBaseURI",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",
@@ -564,12 +626,12 @@ function App() {
     {
       inputs: [
         {
-          internalType: "string",
-          name: "_newBaseURI",
-          type: "string",
+          internalType: "uint256",
+          name: "_newCost",
+          type: "uint256",
         },
       ],
-      name: "setBaseURI",
+      name: "setMintCost",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",
@@ -604,6 +666,13 @@ function App() {
         },
       ],
       stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "toggleMinting",
+      outputs: [],
+      stateMutability: "nonpayable",
       type: "function",
     },
     {
@@ -721,7 +790,7 @@ function App() {
       inputs: [],
       name: "withdraw",
       outputs: [],
-      stateMutability: "payable",
+      stateMutability: "nonpayable",
       type: "function",
     },
   ]);
@@ -732,9 +801,7 @@ function App() {
       return;
     }
     try {
-      //Provider -> BrowserProvider()
       const provider = new BrowserProvider(window.ethereum);
-      setProvider(provider);
 
       // In ethers v6, we first request accounts
       await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -745,20 +812,45 @@ function App() {
 
       const accountAddress = await signer.getAddress();
       setWalletAddress(accountAddress);
+      console.log("wallet Connected!!");
       console.log("Wallet Address: " + accountAddress);
     } catch (err) {
       console.log(err);
+      alert(err.message);
     }
+  };
+
+  const disconnectWallet = async () => {
+    try {
+      // Clear the stored signer and wallet address
+      setSigner(null);
+      setWalletAddress("");
+      alert("Wallet Disconnected");
+      console.log("Wallet disconnected!");
+    } catch (err) {
+      console.error("Error disconnecting wallet:", err);
+      alert(err.message);
+    }
+  };
+
+  const getContract_with_signer = () => {
+    return new ethers.Contract(contractAddress, abi, signer);
   };
 
   return (
     <>
-      <TopBar walletAddress={walletAddress} connectWallet={connectWallet} />
+      <TopBar
+        getContract_with_signer={getContract_with_signer}
+        walletAddress={walletAddress}
+        connectWallet={connectWallet}
+        disconnectWallet={disconnectWallet}
+      />
       <NFTCard
         walletAddress={walletAddress}
         signer={signer}
         contractAddress={contractAddress}
         abi={abi}
+        getContract_with_signer={getContract_with_signer}
       />
     </>
   );

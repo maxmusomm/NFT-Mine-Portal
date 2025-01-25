@@ -15,16 +15,16 @@ const config: HardhatUserConfig = {
       ],
     },
     holesky: {
-      url: "https://eth-holesky.g.alchemy.com/v2/aTw56Gk9DOcHWyKWyUtgKOezfj1gy3tV",
+      url: process.env.HOLESKY_RPC_URL,
       accounts: [process.env.SEPOLIA_PRIVATE_KEY!],
     },
     sepolia: {
-      url: process.env.URL!,
+      url: process.env.SEPOLIA_RPC_URL!,
       accounts: [process.env.SEPOLIA_PRIVATE_KEY!],
     },
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API, // Replace with your actual API key
+    apiKey: process.env.ETHERSCAN_API_KEY, // Replace with your actual API key
   },
   sourcify: {
     enabled: true,
